@@ -4,13 +4,12 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export function NewVitalsForm() {
+export function NewMedicationForm() {
   const supabase = createClient();
-  const [heartRate, setHeartRate] = useState("");
-  const [systolicBp, setSystolicBp] = useState("");
-  const [diastolicBp, setDiastolicBp] = useState("");
-  const [weight, setWeight] = useState("");
-  const [symptoms, setSymptoms] = useState("");
+  const [medicationName, setMedicationName] = useState("");
+  const [dosage, setDosage] = useState("");
+  const [frequency, setFrequency] = useState("");
+  const [notes, setNotes] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -25,19 +24,55 @@ export function NewVitalsForm() {
     } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      setError(userError?.message ?? "You must be signed in to add vitals.");
+      setError(
+        userError?.message ?? "You must be signed in to add medications.",
+      );
       setLoading(false);
       return;
     }
 
-    const { error: insertError } = await supabase.from("vitals").insert({
+    const medicationPayload = {
       patient_id: user.id,
-      heart_rate: Number(heartRate),
-      systolic_bp: Number(systolicBp),
-      diastolic_bp: Number(diastolicBp),
-      weight: Number(weight),
-      symptoms: symptoms.trim() || null,
-    });
+      medication_name: medicationName.trim(),
+      dosage: dosage.trim(),
+      frequency: frequency.trim(),
+      notes: notes.trim() || null,
+    };
+
+    let { error: insertError } = await supabase
+      .from("medications")
+      .insert(medicationPayload);
+
+    if (
+      insertError?.message.includes("medication_name") ||
+      insertError?.message.includes("medicine_name") ||
+      insertError?.message.includes("'medications'") ||
+      insertError?.message.includes("schema cache")
+    ) {
+      let fallbackInsert = await supabase.from("medications").insert({
+        patient_id: user.id,
+        medicine_name: medicationName.trim(),
+        dosage: dosage.trim(),
+        frequency: frequency.trim(),
+        notes: notes.trim() || null,
+      });
+
+      if (
+        fallbackInsert.error?.message.includes("name") ||
+        fallbackInsert.error?.message.includes("schema cache") ||
+        fallbackInsert.error?.message.includes("not-null")
+      ) {
+        fallbackInsert = await supabase.from("medications").insert({
+          patient_id: user.id,
+          name: medicationName.trim(),
+          dosage: dosage.trim(),
+          frequency: frequency.trim(),
+          notes: notes.trim() || null,
+        });
+      }
+
+      insertError = fallbackInsert.error;
+    }
 
     if (insertError) {
       setError(insertError.message);
@@ -45,13 +80,12 @@ export function NewVitalsForm() {
       return;
     }
 
-    setHeartRate("");
-    setSystolicBp("");
-    setDiastolicBp("");
-    setWeight("");
-    setSymptoms("");
+    setMedicationName("");
+    setDosage("");
+    setFrequency("");
+    setNotes("");
     setLoading(false);
-    window.location.assign("/dashboard?success=vitals-saved");
+    window.location.assign("/medications?success=medication-saved");
   }
 
   return (
@@ -60,95 +94,65 @@ export function NewVitalsForm() {
         <div className="space-y-2">
           <label
             className="text-sm font-medium text-slate-800"
-            htmlFor="heart-rate"
+            htmlFor="medication-name"
           >
-            Heart rate
+            Medication name
           </label>
           <input
-            id="heart-rate"
-            type="number"
-            inputMode="numeric"
-            min="1"
-            value={heartRate}
-            onChange={(event) => setHeartRate(event.target.value)}
+            id="medication-name"
+            type="text"
+            value={medicationName}
+            onChange={(event) => setMedicationName(event.target.value)}
             className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-            placeholder="72"
+            placeholder="Atorvastatin"
             required
           />
         </div>
 
         <div className="space-y-2">
-          <label
-            className="text-sm font-medium text-slate-800"
-            htmlFor="weight"
-          >
-            Weight
+          <label className="text-sm font-medium text-slate-800" htmlFor="dosage">
+            Dosage
           </label>
           <input
-            id="weight"
-            type="number"
-            inputMode="decimal"
-            min="1"
-            step="0.1"
-            value={weight}
-            onChange={(event) => setWeight(event.target.value)}
+            id="dosage"
+            type="text"
+            value={dosage}
+            onChange={(event) => setDosage(event.target.value)}
             className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-            placeholder="68.5"
+            placeholder="20 mg"
             required
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2 sm:col-span-2">
           <label
             className="text-sm font-medium text-slate-800"
-            htmlFor="systolic-bp"
+            htmlFor="frequency"
           >
-            Systolic BP
+            Frequency
           </label>
           <input
-            id="systolic-bp"
-            type="number"
-            inputMode="numeric"
-            min="1"
-            value={systolicBp}
-            onChange={(event) => setSystolicBp(event.target.value)}
+            id="frequency"
+            type="text"
+            value={frequency}
+            onChange={(event) => setFrequency(event.target.value)}
             className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-            placeholder="120"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <label
-            className="text-sm font-medium text-slate-800"
-            htmlFor="diastolic-bp"
-          >
-            Diastolic BP
-          </label>
-          <input
-            id="diastolic-bp"
-            type="number"
-            inputMode="numeric"
-            min="1"
-            value={diastolicBp}
-            onChange={(event) => setDiastolicBp(event.target.value)}
-            className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-            placeholder="80"
+            placeholder="Once daily after dinner"
             required
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-slate-800" htmlFor="symptoms">
-          Symptoms
+        <label className="text-sm font-medium text-slate-800" htmlFor="notes">
+          Notes
         </label>
         <textarea
-          id="symptoms"
-          value={symptoms}
-          onChange={(event) => setSymptoms(event.target.value)}
+          id="notes"
+          value={notes}
+          onChange={(event) => setNotes(event.target.value)}
           className="min-h-32 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
-          placeholder="Describe any symptoms or notes"
+          placeholder="Optional reminders or instructions"
         />
       </div>
 
@@ -164,14 +168,14 @@ export function NewVitalsForm() {
           disabled={loading}
           className="flex h-12 flex-1 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
         >
-          {loading ? "Saving..." : "Save vitals"}
+          {loading ? "Saving..." : "Save medication"}
         </button>
 
         <Link
           href="/dashboard"
           className="flex h-12 items-center justify-center rounded-xl border border-slate-200 px-4 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
         >
-          Cancel
+          Back to dashboard
         </Link>
       </div>
     </form>
