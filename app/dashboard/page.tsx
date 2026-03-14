@@ -27,6 +27,16 @@ export default async function DashboardPage({
     .eq("id", user.id)
     .maybeSingle();
 
+  const { data: latestVitals } = await supabase
+    .from("vitals")
+    .select(
+      "heart_rate, systolic_bp, diastolic_bp, weight, symptoms, created_at",
+    )
+    .eq("patient_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   const params = await searchParams;
   const showVitalsSaved = params?.success === "vitals-saved";
 
@@ -89,6 +99,80 @@ export default async function DashboardPage({
             </p>
           </div>
         </div>
+
+        <section className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-6">
+          <div className="flex flex-col gap-2 border-b border-slate-200 pb-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+                Latest vitals
+              </p>
+              <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+                Most recent health entry
+              </h2>
+            </div>
+            <Link
+              href="/vitals/new"
+              className="text-sm font-medium text-slate-700 transition hover:text-slate-950"
+            >
+              Add another entry
+            </Link>
+          </div>
+
+          {latestVitals ? (
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+                  Heart rate
+                </p>
+                <p className="mt-2 text-lg font-semibold text-slate-950">
+                  {latestVitals.heart_rate} bpm
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+                  Blood pressure
+                </p>
+                <p className="mt-2 text-lg font-semibold text-slate-950">
+                  {latestVitals.systolic_bp}/{latestVitals.diastolic_bp} mmHg
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+                  Weight
+                </p>
+                <p className="mt-2 text-lg font-semibold text-slate-950">
+                  {latestVitals.weight} kg
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+                  Recorded
+                </p>
+                <p className="mt-2 text-lg font-semibold text-slate-950">
+                  {latestVitals.created_at
+                    ? new Date(latestVitals.created_at).toLocaleDateString()
+                    : "Just now"}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white p-5 text-sm text-slate-600">
+              No vitals entries yet. Add your first record to start tracking
+              recent measurements.
+            </div>
+          )}
+
+          {latestVitals?.symptoms ? (
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+                Symptoms
+              </p>
+              <p className="mt-2 text-sm leading-6 text-slate-700">
+                {latestVitals.symptoms}
+              </p>
+            </div>
+          ) : null}
+        </section>
       </div>
     </main>
   );
