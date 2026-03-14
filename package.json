@@ -6,7 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:start": "npx supabase start",
+    "db:stop": "npx supabase stop",
+    "db:status": "npx supabase status",
+    "db:link": "npx supabase link --project-ref tkcmkkdtfpumrnzailah",
+    "db:pull": "npx supabase db pull",
+    "db:push": "npx supabase db push",
+    "db:new": "npx supabase migration new",
+    "db:types": "npx supabase gen types typescript --linked --schema public > lib/supabase/database.types.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",

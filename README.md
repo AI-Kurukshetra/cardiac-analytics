@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Cardiac Care AI
+
+Next.js App Router project with Supabase authentication and database-backed patient workflows.
 
 ## Getting Started
 
-First, run the development server:
+Install dependencies and start the app:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Supabase Workflow
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This repo tracks database changes in `supabase/migrations/`.
 
-## Learn More
+### One-time setup
 
-To learn more about Next.js, take a look at the following resources:
+1. Log in to Supabase:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```bash
+   npx supabase login
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. Initialize local Supabase project files if you have not already:
 
-## Deploy on Vercel
+   ```bash
+   npx supabase init
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. Link this repo to the hosted Supabase project:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```bash
+   npm run db:link
+   ```
+
+### If the dashboard already has schema changes
+
+If tables, policies, or columns were created directly in the Supabase dashboard, pull them into versioned migrations before making more schema changes locally:
+
+```bash
+npm run db:pull
+```
+
+### Normal schema change flow
+
+1. Create a migration:
+
+   ```bash
+   npm run db:new -- add_vitals_table
+   ```
+
+2. Edit the generated SQL file in `supabase/migrations/`.
+
+3. Apply pending migrations to the linked Supabase project:
+
+   ```bash
+   npm run db:push
+   ```
+
+### Local Supabase stack
+
+If you want to run Supabase locally with Docker:
+
+```bash
+npm run db:start
+npm run db:status
+npm run db:stop
+```
+
+### Generate TypeScript database types
+
+After schema changes, regenerate the database types:
+
+```bash
+npm run db:types
+```
