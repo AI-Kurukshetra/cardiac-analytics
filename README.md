@@ -71,6 +71,76 @@ npm run db:status
 npm run db:stop
 ```
 
+## Demo seeding
+
+The demo seed flow is intentionally handled by a backend script instead of raw SQL inserts into `auth.users`.
+This keeps the seed safe for the current schema, where `profiles`, `vitals`, `medications`, `care_plans`, `alerts`, and `follow_ups` all rely on valid `auth.users(id)` values.
+
+### What it seeds
+
+- 1 provider: `dr.maya.chen@demo.cardiaccare.app`
+- 5 patients with distinct cardiac scenarios
+- `profiles`
+- `vitals`
+- `medications`
+- `medication_adherence`
+- `care_plans`
+- `follow_ups`
+- `alerts` via the existing `sync_alerts_from_latest_vitals` trigger
+
+### Required environment
+
+Add these variables to `.env.local` before running the seed:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=...
+SUPABASE_SERVICE_ROLE_KEY=...
+```
+
+Optional:
+
+```bash
+DEMO_SEED_PASSWORD=DemoPass123!
+DEMO_SEED_CREATE_USERS=true
+```
+
+`DEMO_SEED_CREATE_USERS=true` is the default. When enabled, the script creates any missing demo auth accounts through the Supabase Admin API. If you already created those demo users manually and want the script to fail instead of creating them, set `DEMO_SEED_CREATE_USERS=false`.
+
+### How to run it
+
+1. Make sure your schema is current:
+
+   ```bash
+   npm run db:push
+   ```
+
+2. Run the demo seed:
+
+   ```bash
+   npm run seed:demo
+   ```
+
+3. Sign in with:
+
+   ```text
+   dr.maya.chen@demo.cardiaccare.app
+   ```
+
+   Password:
+
+   ```text
+   DemoPass123!
+   ```
+
+### What the script does
+
+- Resolves each demo user by email in `auth.users`
+- Creates missing auth users safely through the Admin API when allowed
+- Upserts matching `profiles`
+- Deletes old demo rows for those patient IDs so reseeding is repeatable
+- Inserts vitals history, medications, adherence, care plans, and follow-ups
+- Lets the existing database trigger regenerate current `alerts` from the latest vitals
+
 ### Generate TypeScript database types
 
 After schema changes, regenerate the database types:

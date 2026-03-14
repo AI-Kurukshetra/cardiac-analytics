@@ -1,0 +1,2 @@
+-- Demo data is seeded via the backend script at scripts/seed-demo.mjs.
+-- This file intentionally does not insert into auth.users so db reset remains safe.

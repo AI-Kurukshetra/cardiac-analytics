@@ -1,2 +1,0 @@
--- Placeholder to match the remote Supabase migration history for version 20260314.
--- The remote project already has this version recorded in supabase_migrations.schema_migrations.

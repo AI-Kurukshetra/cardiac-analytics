@@ -1,7 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 
 export type MedicationRecord = {
-  id: number;
+  id: string;
   medication_name: string;
   dosage: string | null;
   frequency: string | null;
@@ -25,7 +25,7 @@ export function getCurrentUtcDateKey(date = new Date()) {
 function normalizeMedicationRows(
   medications:
     | Array<{
-        id: number;
+        id: string;
         medication_name: string;
         dosage: string | null;
         frequency: string | null;
@@ -82,7 +82,7 @@ export async function fetchPatientMedications(
     .eq("patient_id", patientId)
     .eq("taken_on", todayKey);
 
-  const adherenceByMedicationId = new Map<number, string | null>();
+  const adherenceByMedicationId = new Map<string, string | null>();
 
   for (const row of adherenceRows ?? []) {
     adherenceByMedicationId.set(row.medication_id, row.taken_at);

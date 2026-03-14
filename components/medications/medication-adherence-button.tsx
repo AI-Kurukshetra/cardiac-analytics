@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getCurrentUtcDateKey } from "@/lib/medications";
 
 type MedicationAdherenceButtonProps = {
-  medicationId: number;
+  medicationId: string;
   takenToday: boolean;
   takenAt: string | null;
 };

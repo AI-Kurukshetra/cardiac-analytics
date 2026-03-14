@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { PatientDashboardView } from "@/components/dashboard/patient-dashboard-view";
 import { ProviderDashboardView } from "@/components/dashboard/provider-dashboard-view";
+import { AuthenticatedHealthAssistant } from "@/components/assistant/authenticated-health-assistant";
 import {
   LatestVitals,
   ProviderLatestVitals,
@@ -118,11 +119,14 @@ export default async function DashboardPage({
       });
 
     return (
-      <ProviderDashboardView
-        fullName={profile.full_name}
-        email={user.email}
-        patients={providerPatients}
-      />
+      <>
+        <ProviderDashboardView
+          fullName={profile.full_name}
+          email={user.email}
+          patients={providerPatients}
+        />
+        <AuthenticatedHealthAssistant />
+      </>
     );
   }
 
@@ -209,21 +213,24 @@ export default async function DashboardPage({
   const medicationAdherence = getMedicationAdherenceSummary(medications);
 
   return (
-    <PatientDashboardView
-      fullName={profile?.full_name}
-      email={user.email}
-      role={profile?.role}
-      latestVitals={latestVitals}
-      vitalsHistory={orderedVitalsHistory}
-      risk={risk}
-      healthSummary={healthSummary}
-      alerts={alerts}
-      medications={medications}
-      medicationAdherence={medicationAdherence}
-      followUp={followUp}
-      carePlans={carePlans}
-      showVitalsSaved={showVitalsSaved}
-      showDemoVitalsLoaded={showDemoVitalsLoaded}
-    />
+    <>
+      <PatientDashboardView
+        fullName={profile?.full_name}
+        email={user.email}
+        role={profile?.role}
+        latestVitals={latestVitals}
+        vitalsHistory={orderedVitalsHistory}
+        risk={risk}
+        healthSummary={healthSummary}
+        alerts={alerts}
+        medications={medications}
+        medicationAdherence={medicationAdherence}
+        followUp={followUp}
+        carePlans={carePlans}
+        showVitalsSaved={showVitalsSaved}
+        showDemoVitalsLoaded={showDemoVitalsLoaded}
+      />
+      <AuthenticatedHealthAssistant />
+    </>
   );
 }
