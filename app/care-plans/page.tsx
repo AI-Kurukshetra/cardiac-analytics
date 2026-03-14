@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthenticatedHealthAssistant } from "@/components/assistant/authenticated-health-assistant";
 import { NewCarePlanForm } from "@/components/care-plans/new-care-plan-form";
+import { SupabaseConfigState } from "@/components/system/supabase-config-state";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
 type CarePlansPageProps = {
@@ -29,6 +31,25 @@ function formatDate(date: string) {
 export default async function CarePlansPage({
   searchParams,
 }: CarePlansPageProps) {
+  if (!isSupabaseConfigured()) {
+    return (
+      <main className="page-shell">
+        <div className="ambient-orbs">
+          <span className="ambient-orb ambient-orb-sky left-[-4rem] top-18 h-48 w-48" />
+          <span className="ambient-orb ambient-orb-amber right-[-4rem] top-14 h-48 w-48" />
+        </div>
+        <div className="page-frame max-w-4xl">
+          <SupabaseConfigState
+            title="Care plans page needs Supabase setup"
+            description="This deployment cannot load or save care plans until the public Supabase environment variables are configured in Vercel."
+            backHref="/dashboard"
+            backLabel="Back to dashboard"
+          />
+        </div>
+      </main>
+    );
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

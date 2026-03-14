@@ -1,9 +1,30 @@
 import { redirect } from "next/navigation";
 import { AuthenticatedHealthAssistant } from "@/components/assistant/authenticated-health-assistant";
+import { SupabaseConfigState } from "@/components/system/supabase-config-state";
 import { NewVitalsForm } from "@/components/vitals/new-vitals-form";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function NewVitalsPage() {
+  if (!isSupabaseConfigured()) {
+    return (
+      <main className="page-shell">
+        <div className="ambient-orbs">
+          <span className="ambient-orb ambient-orb-teal left-[-4rem] top-20 h-48 w-48" />
+          <span className="ambient-orb ambient-orb-sky right-[-4rem] top-12 h-52 w-52" />
+        </div>
+        <div className="page-frame max-w-4xl">
+          <SupabaseConfigState
+            title="Vitals entry needs Supabase setup"
+            description="This deployment cannot save vitals until the public Supabase environment variables are configured in Vercel."
+            backHref="/dashboard"
+            backLabel="Back to dashboard"
+          />
+        </div>
+      </main>
+    );
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { PatientDashboardView } from "@/components/dashboard/patient-dashboard-view";
 import { ProviderDashboardView } from "@/components/dashboard/provider-dashboard-view";
 import { AuthenticatedHealthAssistant } from "@/components/assistant/authenticated-health-assistant";
+import { SupabaseConfigState } from "@/components/system/supabase-config-state";
 import {
   LatestVitals,
   ProviderLatestVitals,
@@ -18,6 +19,7 @@ import {
   getMedicationAdherenceSummary,
 } from "@/lib/medications";
 import { RiskAssessment, calculateRiskFromVitals } from "@/lib/risk";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
 type DashboardPageProps = {
@@ -36,6 +38,25 @@ const riskPriority: Record<RiskAssessment["level"], number> = {
 export default async function DashboardPage({
   searchParams,
 }: DashboardPageProps) {
+  if (!isSupabaseConfigured()) {
+    return (
+      <main className="page-shell">
+        <div className="ambient-orbs">
+          <span className="ambient-orb ambient-orb-sky left-[-4rem] top-20 h-52 w-52" />
+          <span className="ambient-orb ambient-orb-teal right-[-5rem] top-12 h-56 w-56" />
+        </div>
+        <div className="page-frame max-w-4xl">
+          <SupabaseConfigState
+            title="Dashboard is waiting for Supabase setup"
+            description="This deployment cannot load user, vitals, or assistant data until the public Supabase environment variables are added in Vercel."
+            backHref="/login"
+            backLabel="Back to login"
+          />
+        </div>
+      </main>
+    );
+  }
+
   const supabase = await createClient();
   const {
     data: { user },
