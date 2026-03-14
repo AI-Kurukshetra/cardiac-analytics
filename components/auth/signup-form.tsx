@@ -74,10 +74,7 @@ export function SignupForm() {
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
       <div className="space-y-2">
-        <label
-          className="text-sm font-medium text-slate-800"
-          htmlFor="signup-full-name"
-        >
+        <label className="field-label" htmlFor="signup-full-name">
           Full name
         </label>
         <input
@@ -86,17 +83,14 @@ export function SignupForm() {
           autoComplete="name"
           value={fullName}
           onChange={(event) => setFullName(event.target.value)}
-          className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+          className="field-input"
           placeholder="Enter your full name"
           required
         />
       </div>
 
       <div className="space-y-2">
-        <label
-          className="text-sm font-medium text-slate-800"
-          htmlFor="signup-email"
-        >
+        <label className="field-label" htmlFor="signup-email">
           Email
         </label>
         <input
@@ -105,17 +99,14 @@ export function SignupForm() {
           autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+          className="field-input"
           placeholder="name@example.com"
           required
         />
       </div>
 
       <div className="space-y-2">
-        <label
-          className="text-sm font-medium text-slate-800"
-          htmlFor="signup-password"
-        >
+        <label className="field-label" htmlFor="signup-password">
           Password
         </label>
         <input
@@ -124,24 +115,21 @@ export function SignupForm() {
           autoComplete="new-password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+          className="field-input"
           placeholder="Create a password"
           required
         />
       </div>
 
       <div className="space-y-2">
-        <label
-          className="text-sm font-medium text-slate-800"
-          htmlFor="signup-role"
-        >
+        <label className="field-label" htmlFor="signup-role">
           Role
         </label>
         <select
           id="signup-role"
           value={role}
           onChange={(event) => setRole(event.target.value)}
-          className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+          className="field-input"
         >
           <option value="patient">Patient</option>
           <option value="provider">Provider</option>
@@ -149,13 +137,13 @@ export function SignupForm() {
       </div>
 
       {error ? (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p className="banner-error">
           {error}
         </p>
       ) : null}
 
       {message ? (
-        <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <p className="banner-success">
           {message}
         </p>
       ) : null}
@@ -163,7 +151,7 @@ export function SignupForm() {
       <button
         type="submit"
         disabled={loading}
-        className="flex h-12 w-full items-center justify-center rounded-xl bg-slate-950 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+        className="primary-btn w-full"
       >
         {loading ? "Creating account..." : "Create account"}
       </button>
@@ -172,7 +160,7 @@ export function SignupForm() {
         Already have an account?{" "}
         <Link
           href="/login"
-          className="font-medium text-slate-900 transition hover:text-slate-700"
+          className="font-semibold text-teal-700 transition hover:text-slate-950"
         >
           Sign in
         </Link>

@@ -68,7 +68,7 @@ export function NewCarePlanForm() {
           type="text"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+          className="field-input"
           placeholder="Daily blood pressure check"
           required
         />
@@ -85,7 +85,7 @@ export function NewCarePlanForm() {
           id="description"
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          className="min-h-32 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+          className="field-textarea"
           placeholder="Write the plan in simple steps so it is easy to follow."
           required
         />
@@ -100,7 +100,7 @@ export function NewCarePlanForm() {
             id="status"
             value={status}
             onChange={(event) => setStatus(event.target.value)}
-            className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+            className="field-input"
           >
             {statusOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -122,13 +122,13 @@ export function NewCarePlanForm() {
             type="date"
             value={nextReviewDate}
             onChange={(event) => setNextReviewDate(event.target.value)}
-            className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+            className="field-input"
           />
         </div>
       </div>
 
       {error ? (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p className="banner-error">
           {error}
         </p>
       ) : null}
@@ -137,14 +137,14 @@ export function NewCarePlanForm() {
         <button
           type="submit"
           disabled={loading}
-          className="flex h-12 flex-1 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+          className="primary-btn flex-1"
         >
           {loading ? "Saving..." : "Save care plan"}
         </button>
 
         <Link
           href="/dashboard"
-          className="flex h-12 items-center justify-center rounded-xl border border-slate-200 px-4 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
+          className="secondary-btn"
         >
           Back to dashboard
         </Link>

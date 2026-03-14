@@ -103,7 +103,7 @@ export function NewMedicationForm() {
             type="text"
             value={medicationName}
             onChange={(event) => setMedicationName(event.target.value)}
-            className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+            className="field-input"
             placeholder="Atorvastatin"
             required
           />
@@ -118,7 +118,7 @@ export function NewMedicationForm() {
             type="text"
             value={dosage}
             onChange={(event) => setDosage(event.target.value)}
-            className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+            className="field-input"
             placeholder="20 mg"
             required
           />
@@ -136,7 +136,7 @@ export function NewMedicationForm() {
             type="text"
             value={frequency}
             onChange={(event) => setFrequency(event.target.value)}
-            className="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+            className="field-input"
             placeholder="Once daily after dinner"
             required
           />
@@ -151,13 +151,13 @@ export function NewMedicationForm() {
           id="notes"
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
-          className="min-h-32 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-950 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
+          className="field-textarea"
           placeholder="Optional reminders or instructions"
         />
       </div>
 
       {error ? (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <p className="banner-error">
           {error}
         </p>
       ) : null}
@@ -166,14 +166,14 @@ export function NewMedicationForm() {
         <button
           type="submit"
           disabled={loading}
-          className="flex h-12 flex-1 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-400"
+          className="primary-btn flex-1"
         >
           {loading ? "Saving..." : "Save medication"}
         </button>
 
         <Link
           href="/dashboard"
-          className="flex h-12 items-center justify-center rounded-xl border border-slate-200 px-4 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
+          className="secondary-btn"
         >
           Back to dashboard
         </Link>

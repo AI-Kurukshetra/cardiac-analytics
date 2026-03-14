@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { MedicationAdherenceButton } from "@/components/medications/medication-adherence-button";
 import { NewMedicationForm } from "@/components/medications/new-medication-form";
+import {
+  fetchPatientMedications,
+  getMedicationAdherenceSummary,
+} from "@/lib/medications";
 import { createClient } from "@/lib/supabase/server";
 
 type MedicationsPageProps = {
@@ -21,77 +26,48 @@ export default async function MedicationsPage({
     redirect("/login");
   }
 
-  let { data: medications } = await supabase
-    .from("medications")
-    .select("id, medication_name, dosage, frequency, notes, created_at")
-    .eq("patient_id", user.id)
-    .order("created_at", { ascending: false });
-
-  if (!medications) {
-    const fallbackResponse = await supabase
-      .from("medications")
-      .select("id, medicine_name, dosage, frequency, notes, created_at")
-      .eq("patient_id", user.id)
-      .order("created_at", { ascending: false });
-
-    medications =
-      fallbackResponse.data?.map((medication) => ({
-        ...medication,
-        medication_name: medication.medicine_name,
-      })) ?? null;
-  }
-
-  if (!medications) {
-    const legacyResponse = await supabase
-      .from("medications")
-      .select("id, name, dosage, frequency, notes, created_at")
-      .eq("patient_id", user.id)
-      .order("created_at", { ascending: false });
-
-    medications =
-      legacyResponse.data?.map((medication) => ({
-        ...medication,
-        medication_name: medication.name,
-      })) ?? null;
-  }
+  const medications = await fetchPatientMedications(supabase, user.id);
+  const adherenceSummary = getMedicationAdherenceSummary(medications);
 
   const params = await searchParams;
   const showMedicationSaved = params?.success === "medication-saved";
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-10">
-      <div className="mx-auto max-w-5xl rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-start sm:justify-between">
+    <main className="page-shell">
+      <div className="ambient-orbs">
+        <span className="ambient-orb ambient-orb-amber left-[-4rem] top-24 h-48 w-48" />
+        <span className="ambient-orb ambient-orb-teal right-[-5rem] top-12 h-52 w-52" />
+      </div>
+      <div className="page-frame max-w-6xl">
+        <div className="glass-panel surface-card">
+        <div className="flex flex-col gap-4 border-b pb-6 section-divider sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
+            <p className="eyebrow">
               Medications
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
+            <h1 className="section-title sm:text-3xl">
               Manage current medications
             </h1>
-            <p className="text-sm leading-6 text-slate-600">
+            <p className="section-copy">
               Add medications and keep a simple list of what is currently active.
             </p>
           </div>
 
-          <Link
-            href="/dashboard"
-            className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 px-4 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-950"
-          >
+          <Link href="/dashboard" className="secondary-btn h-11">
             Back to dashboard
           </Link>
         </div>
 
         {showMedicationSaved ? (
-          <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <div className="banner-success mt-6">
             Medication saved successfully.
           </div>
         ) : null}
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-          <section className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-            <div className="border-b border-slate-200 pb-4">
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+          <section className="glass-panel-strong section-card">
+            <div className="border-b pb-4 section-divider">
+              <p className="eyebrow">
                 Add medication
               </p>
               <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
@@ -104,25 +80,52 @@ export default async function MedicationsPage({
             </div>
           </section>
 
-          <section className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-            <div className="border-b border-slate-200 pb-4">
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+          <section className="glass-panel-strong section-card">
+            <div className="border-b pb-4 section-divider">
+              <p className="eyebrow">
                 Active medications
               </p>
               <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
                 Current list
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                All medications added here are treated as active in this MVP.
+                This demo tracks one dose confirmation per medication per day.
               </p>
             </div>
 
-            {medications?.length ? (
+            <div className="mt-5 grid gap-4 sm:grid-cols-3">
+              <article className="rounded-[22px] border border-emerald-200 bg-emerald-50/80 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                  Taken today
+                </p>
+                <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                  {adherenceSummary.takenToday}
+                </p>
+              </article>
+              <article className="rounded-[22px] border border-amber-200 bg-amber-50/80 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-amber-700">
+                  Pending today
+                </p>
+                <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                  {adherenceSummary.pendingToday}
+                </p>
+              </article>
+              <article className="rounded-[22px] border border-sky-200 bg-sky-50/80 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-sky-700">
+                  Adherence
+                </p>
+                <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                  {adherenceSummary.adherenceRate}%
+                </p>
+              </article>
+            </div>
+
+            {medications.length ? (
               <div className="mt-5 space-y-4">
                 {medications.map((medication) => (
                   <article
                     key={medication.id}
-                    className="rounded-2xl border border-slate-200 bg-white p-5"
+                    className="rounded-[24px] border border-white/85 bg-white/88 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]"
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
@@ -130,12 +133,24 @@ export default async function MedicationsPage({
                           {medication.medication_name}
                         </h3>
                         <p className="mt-2 text-sm text-slate-700">
-                          {medication.dosage} / {medication.frequency}
+                          {medication.dosage || "Dose not set"} /{" "}
+                          {medication.frequency || "Schedule not set"}
                         </p>
                       </div>
-                      <span className="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">
-                        Active
-                      </span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700">
+                          Active
+                        </span>
+                        <span
+                          className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${
+                            medication.takenToday
+                              ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
+                              : "border border-amber-200 bg-amber-50 text-amber-700"
+                          }`}
+                        >
+                          {medication.takenToday ? "Taken today" : "Pending today"}
+                        </span>
+                      </div>
                     </div>
 
                     {medication.notes ? (
@@ -144,21 +159,40 @@ export default async function MedicationsPage({
                       </p>
                     ) : null}
 
-                    <p className="mt-4 text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
-                      Added{" "}
-                      {medication.created_at
-                        ? new Date(medication.created_at).toLocaleDateString()
-                        : "just now"}
-                    </p>
+                    <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-500">
+                          Added{" "}
+                          {medication.created_at
+                            ? new Date(medication.created_at).toLocaleDateString()
+                            : "just now"}
+                        </p>
+                        <p className="text-sm text-slate-600">
+                          {medication.takenAt
+                            ? `Marked taken at ${new Date(medication.takenAt).toLocaleTimeString(undefined, {
+                                hour: "numeric",
+                                minute: "2-digit",
+                              })}`
+                            : "Dose has not been marked as taken yet today."}
+                        </p>
+                      </div>
+
+                      <MedicationAdherenceButton
+                        medicationId={medication.id}
+                        takenToday={medication.takenToday}
+                        takenAt={medication.takenAt}
+                      />
+                    </div>
                   </article>
                 ))}
               </div>
             ) : (
-              <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white p-5 text-sm text-slate-600">
+              <div className="mt-5 rounded-[24px] border border-dashed border-slate-300 bg-white/80 p-5 text-sm text-slate-600">
                 No medications added yet. Use the form to create the first entry.
               </div>
             )}
           </section>
+        </div>
         </div>
       </div>
     </main>
