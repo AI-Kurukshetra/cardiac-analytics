@@ -1,8 +1,17 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { createClient } from "@/lib/supabase/server";
 
-export default async function DashboardPage() {
+type DashboardPageProps = {
+  searchParams?: Promise<{
+    success?: string;
+  }>;
+};
+
+export default async function DashboardPage({
+  searchParams,
+}: DashboardPageProps) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -17,6 +26,9 @@ export default async function DashboardPage() {
     .select("full_name, role")
     .eq("id", user.id)
     .maybeSingle();
+
+  const params = await searchParams;
+  const showVitalsSaved = params?.success === "vitals-saved";
 
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-10">
@@ -34,8 +46,22 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          <LogoutButton />
+          <div className="flex flex-col gap-3 sm:items-end">
+            <Link
+              href="/vitals/new"
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-medium text-white transition hover:bg-slate-800"
+            >
+              Add vitals
+            </Link>
+            <LogoutButton />
+          </div>
         </div>
+
+        {showVitalsSaved ? (
+          <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            Vitals entry saved successfully.
+          </div>
+        ) : null}
 
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
